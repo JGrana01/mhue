@@ -5,7 +5,32 @@ Using ssh/shell, execute the following line:
 
 /usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/JGrana01/mhue/master/mhue.sh" -o "/jffs/scripts/mhue" && chmod 0755 /jffs/scripts/mhue && /jffs/scripts/mhue install
 
+## About
+mhue is a utility that provides a number of commands to manipulate lights, groups and scenes on a Philips Hue Hub.
+It runs under the Asuswrt-Merlin firmware on Asus WiFi routers. It requires Entware to be installed.
+
+mhue can turn lights/groups off and on, change colors, brightness, hue etc. It also supports turning on "scenes" that are setup for light groups.
+
+mhue attempts to support the Asuswrt-Merlin "AddOn" philosophy. It has an install and uninstall function and puts the executable script in /jffs/scripts (with a
+symbolic link to /opt/bin) and install a "conf" file in /jffs/addons/mhue.
+
 ## Usage
+
+When mhue installs, it checks/downloads apps it needs (jq, column), sets up the /jffs/addons/mhue directory with config file (mhue.conf).
+It attempts to get the Philips Hue Hub IP address and if successful, set's that in the .conf file.
+Before mhue can issue commands to the Hue Hub, it requires and authenticated username (aka hash). mhue install will ask the user if it wants to
+attempt to get one from the hub.
+This requires the user to first press the round "link" button on the top of the hub, then press Enter when prompted by install.
+If successful, it populates the ApiHash (username) in mhue.conf. mhue is now ready for use.
+If the user decides to do this later or it fails, they can attempt it again wirh mhue by executing:
+
+$ mhue gethueun
+
+If mhue can't get one, the user will need to create a Philips Hue developers account (easy and free) and generate the ApiHash (username) following the steps here:
+
+https://www.sitebase.be/generate-phillips-hue-api-token/
+
+
 ```
 Usage:            mhue <command> | <light|group|scene> <number|name> <action> <value> [<value>]
 ==========================================================================
