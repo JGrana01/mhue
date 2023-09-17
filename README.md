@@ -14,7 +14,7 @@ mhue can turn lights/groups off and on, change colors, brightness, hue etc. It a
 mhue attempts to support the Asuswrt-Merlin "AddOn" philosophy. It has an install and uninstall function and puts the executable script in /jffs/scripts (with a
 symbolic link to /opt/bin) and install a "conf" file in /jffs/addons/mhue.
 
-## Installation
+## Installation Process
 
 When mhue installs, it checks/downloads apps it needs (jq, column), sets up the /jffs/addons/mhue directory with a config file (mhue.conf).
 It attempts to get the Philips Hue Hub IP address and if successful, set's that in the .conf file.
