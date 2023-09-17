@@ -26,7 +26,7 @@ This requires the user to first press the round "link" button on the top of the 
 If successful, it populates the ApiHash (username) in mhue.conf. mhue is now ready for use.
 If the user decides to do this later or it fails, they can attempt it again wirh mhue by executing:
 
-$ mhue gethueun
+**$ mhue gethueun**
 
 If mhue can't get one, the user will need to create a Philips Hue developers account (easy and free) and generate the ApiHash (username) following the steps here:
 
