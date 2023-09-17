@@ -172,9 +172,10 @@ To turn off the scene, you just need to turn off the group. For example:
 **$ mhue group 2 state off**
 
 There are also a set of utilty commands.
+```
 -show - shows lights, groups and scenes as known by the Hue hub
 -colors - show the list of colors available for the Hue devices
 -convert - convert a color to it's gammut x y  coordinates
 -hubconfig - retrieve and display the Hue hub internal configuration (in json format). Useful for debugging.
-
+```
 
