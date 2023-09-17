@@ -68,6 +68,9 @@
 # -v0.1.2		(Experimental) added function to
 #			create hashed username			(JJG)
 #
+# -v0.1.3		added verbose mode for output
+#			added more info after install		(JJG)
+#
 
 # global variables 
 
@@ -105,8 +108,17 @@ function usage() {
 	echo "help (this screen)            :  mhue help"
 	echo "install                       :  mhue install"
 	echo "uninstall                     :  mhue uninstall"
+	echo "get hub username              :  mhue gethueun"
+	echo "Show hub config               :  mhue hubconfig"
 	echo "=========================================================================="
 	exit 1
+}
+
+hueprint() {
+
+	if [ "$hueVerbose" -eq "1" ]; then  
+		echo $1
+	fi
 }
 
 function checkapi() {
@@ -250,9 +262,9 @@ fi
 	then
 		$(hue_color convert "$hueColor")
 		hueXy "$hueType" "$hueTypeNumber" "$Xval" "$Yval"
-		echo "[+] mhue: Power and color sent successfully to ${hueType}/${hueTypeNumber}."
+		hueprint "[+] mhue: Power and color sent successfully to ${hueType}/${hueTypeNumber}."
 	else
-		echo "[+] mhue: Power command send successfully to ${hueType}/${hueTypeNumber}."
+		hueprint "[+] mhue: Power command send successfully to ${hueType}/${hueTypeNumber}."
 	fi
 
 }
@@ -295,7 +307,7 @@ function hueSceneOn() {
 		exit 1
 	fi
 
-	echo "[+] mhue: scene sent successfully to ${hueGroup}/${hueScene}."
+	hueprint "[+] mhue: scene sent successfully to ${hueGroup}/${hueScene}."
 }
 
 
@@ -335,7 +347,7 @@ function hueSaturation() {
 		exit 1
 	fi
 	
-	echo "[+] mhue: Saturation command send successfully to ${hueType}/${hueTypeNumber}."
+	hueprint "[+] mhue: Saturation command send successfully to ${hueType}/${hueTypeNumber}."
 }
 
 function hueBrightness() {
@@ -375,7 +387,7 @@ function hueBrightness() {
                 exit 1
         fi
 
-        echo "[+] mhue: Brightness command send successfully to ${hueType}/${hueTypeNumber}."
+        hueprint "[+] mhue: Brightness command send successfully to ${hueType}/${hueTypeNumber}."
 }
 
 function hueHue() {
@@ -415,7 +427,7 @@ function hueHue() {
                 exit 1
         fi
 
-        echo "[+] mhue: Hue command send successfully to ${hueType}/${hueTypeNumber}."
+        hueprint "[+] mhue: Hue command send successfully to ${hueType}/${hueTypeNumber}."
 }
 
 function hueXy() {
@@ -459,7 +471,7 @@ function hueXy() {
                 exit 1
         fi
 
-        echo "[+] mhue: Xy command send successfully to ${hueType}/${hueTypeNumber}." 
+        hueprint "[+] mhue: Xy command sent successfully to ${hueType}/${hueTypeNumber}." 
 }
 
 function hueCt() {
@@ -499,7 +511,7 @@ function hueCt() {
                 exit 1
         fi
 
-        echo "[+] mhue: Ct command send successfully to ${hueType}/${hueTypeNumber}."
+        hueprint "[+] mhue: Ct command send successfully to ${hueType}/${hueTypeNumber}."
 }
 
 function hueCycle() {
@@ -563,7 +575,7 @@ function hueCycle() {
 		if [ ${?} -ne 0 ]; then
 			echo "[-] mhue: Failed to send cycle command to ${hueType}/${hueTypeNumber}, Hue is: ${hueValue}."
 		else
-			echo "[ ] Hue: Cycle command successfully send to ${hueType}/${hueTypeNumber}, Hue is: ${hueValue}."
+			hueprint "[ ] Hue: Cycle command successfully send to ${hueType}/${hueTypeNumber}, Hue is: ${hueValue}."
 		fi
 
 		sleep 1
@@ -591,9 +603,6 @@ function hueCycle() {
 function hue_color() {
 
 SHOWXY=0
-
-echo "hue_color   $1    $2"
-read a
 
 if [ "$1" = "show" ]; then
 	SHOWXY=1
@@ -825,15 +834,35 @@ EOF
 			sed -i '/hueApiHash/d' $SCRIPTCONF
 			echo "hueApiHash=\"$huekey\"" >> $SCRIPTCONF
 			echo
-			echo "Updated $SCRIPTCONF"
+			echo "Updated $SCRIPTCONF:"
 			echo
+			sleep 2
 			cat $SCRIPTCONF
+			echo
+			echo "Install done."
+
 		fi
 	else
 		showhowun
 	fi
 rm -f $HUEHASH
 }
+
+gethueconfig() {
+	if [ -f "$SCRIPTCONF" ]; then
+		. "$SCRIPTCONF"
+	else
+		echo "[-] mhue: No $SCRIPTCONF found"
+        	echo "[-] mhue: Please run mhue install and try again."
+	exit 1
+	fi
+
+	hueBaseUrl="http://${hueBridge}:${huePort}"
+	hueUrl="${hueBaseUrl}/api/${hueApiHash}/config" 
+	curl --max-time ${hueTimeOut} --request GET ${hueUrl} > $SCRIPTDIR/hueconfig
+	jq -C '.' $SCRIPTDIR/hueconfig | more
+}
+
 
 showhowun() {
 		cat <<EOF
@@ -890,6 +919,7 @@ install_hue() {
 		echo "hueBridge=''" >> "$SCRIPTCONF"
 	fi
 	echo "huePort='80'" >> "$SCRIPTCONF"
+	echo "hueVerbose='0'" >> "$SCRIPTCONF"
         echo "# ApiHash is required. " >> "$SCRIPTCONF"
         echo "# If this field is empty, create an account an get and api key from: " >> "$SCRIPTCONF"
         echo "#    https://developers.meethue.com/login/ " >> "$SCRIPTCONF"
@@ -914,7 +944,7 @@ remove_hue() {
 	case "$continue" in
 		Y|y) printf "\\n Uninstalling...\\n"
 		   rm -rf "$SCRIPTDIR"
-#                   rm -f /jffs/scripts/mhue
+                   rm -f /jffs/scripts/mhue
                    if [ -L /opt/bin/mhue ]; then
 			rm -f /opt/bin/mhue
 		   fi
@@ -961,6 +991,20 @@ if [ ${#} -le 3 ]; then
 		;;
 		gethueun)
 			gethue_user
+			exit 0
+		;;
+		verbose)
+			checkapi
+			if [ "$hueVerbose" -eq "0" ]; then
+				sed -i "s/hueVerbose='0'/hueVerbose='1'/" $SCRIPTCONF
+			else
+				sed -i "s/hueVerbose='1'/hueVerbose='0'/" $SCRIPTCONF
+			fi
+			exit 0
+		;;
+		hubconfig)
+			checkapi
+			gethueconfig
 			exit 0
 		;;
 		help)
