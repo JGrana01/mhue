@@ -14,10 +14,12 @@ mhue can turn lights/groups off and on, change colors, brightness, hue etc. It a
 mhue attempts to support the Asuswrt-Merlin "AddOn" philosophy. It has an install and uninstall function and puts the executable script in /jffs/scripts (with a
 symbolic link to /opt/bin) and install a "conf" file in /jffs/addons/mhue.
 
-## Usage
+## Installation
 
-When mhue installs, it checks/downloads apps it needs (jq, column), sets up the /jffs/addons/mhue directory with config file (mhue.conf).
+When mhue installs, it checks/downloads apps it needs (jq, column), sets up the /jffs/addons/mhue directory with a config file (mhue.conf).
 It attempts to get the Philips Hue Hub IP address and if successful, set's that in the .conf file.
+If it can't determine the IP address of the hue hub, the user will need to find it and put the information in mhue.con
+
 Before mhue can issue commands to the Hue Hub, it requires and authenticated username (aka hash). mhue install will ask the user if it wants to
 attempt to get one from the hub.
 This requires the user to first press the round "link" button on the top of the hub, then press Enter when prompted by install.
@@ -30,6 +32,22 @@ If mhue can't get one, the user will need to create a Philips Hue developers acc
 
 https://www.sitebase.be/generate-phillips-hue-api-token/
 
+An example of a fully populated mhue.conf file looks like this:
+
+```
+# mhue settings
+hueBridge='192.168.1.40'
+huePort='80'
+hueVerbose='1'
+# ApiHash is required.
+# If this field is empty, create an account an get and api key from:
+#    https://developers.meethue.com/login/
+# then insert the key below
+hueTimeOut='5'
+hueApiHash="akskfke9rofndfkioifjdf;k"
+```
+## Usage
+mhue supports numerous commands along with command arguments. Here is the present list:
 
 ```
 Usage:            mhue <command> | <light|group|scene> <number|name> <action> <value> [<value>]
