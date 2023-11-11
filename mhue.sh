@@ -970,11 +970,11 @@ updatemhue() {
 		if [ "$a" = "n" ] || [ "$a" = "N" ]; then
 			exit
 		else
-			oldwas=$(grep "SCRIPTVER=" /jffs/scripts/mhue)
+			oldwas=$(grep -m 1 "SCRIPTVER=" /jffs/scripts/mhue)
 			printf "\\nOk, downloading mhue again\\n"
 			/usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/JGrana01/mhue/master/mhue.sh" -o "/jffs/scripts/mhue" && chmod 0755 /jffs/scripts/mhue
 			printf "\\n\\nDone.\\n"
-			newis=$(grep "SCRIPTVER=" /jffs/scripts/mhue)
+			newis=$(grep -m 1 "SCRIPTVER=" /jffs/scripts/mhue)
 			printf "Old version was %s, new version us %s\\n" $oldwas $newis
 			
 		fi
