@@ -76,7 +76,7 @@
 
 SCRIPTNAME="mhue"
 SCRIPTDIR="/jffs/addons/$SCRIPTNAME"
-SCRIPTVER="0.1.2"
+SCRIPTVER="0.1.4"
 SCRIPTCONF="$SCRIPTDIR/mhue.conf"
 HUERESPONSE="/tmp/hueresponse"
 HUEHASH="/tmp/mhue.hash"
@@ -117,7 +117,7 @@ function usage() {
 hueprint() {
 
 	if [ "$hueVerbose" -eq "1" ]; then  
-		echo $1
+		echo "$1"
 	fi
 }
 
@@ -217,10 +217,10 @@ function checkscenes() {
 }
 
 function huePower() {
-	local hueType=${1}
-	local hueTypeNumber=${2}
-	local hueState=${3}
-	local hueColor=$4
+	hueType=${1}
+	hueTypeNumber=${2}
+	hueState=${3}
+	hueColor=$4
 
 	if ! echo "${hueTypeNumber}" | grep -q "^[0-9]"
 	then
@@ -260,7 +260,7 @@ fi
 
         if echo "${hueColor}" | grep -q "^[a-z]"
 	then
-		$(hue_color convert "$hueColor")
+		hue_color convert "$hueColor"
 		hueXy "$hueType" "$hueTypeNumber" "$Xval" "$Yval"
 		hueprint "[+] mhue: Power and color sent successfully to ${hueType}/${hueTypeNumber}."
 	else
@@ -616,6 +616,7 @@ fi
 
 # Gamut B (most typical)
 	case "$lookcolor" in
+		start-color-list) ;;
 		alice-blue) COLOR='-x 0.3092 -y 0.321' ;;
 		antique-white) COLOR='-x 0.3548 -y 0.3489' ;;
 		aqua) COLOR='-x 0.2858 -y 0.2747' ;;
@@ -761,9 +762,11 @@ fi
 		white-smoke) COLOR='-x 0.3227 -y 0.329' ;;
 		yellow) COLOR='-x 0.4317 -y 0.4996' ;;
 		yellow-green) COLOR='-x 0.408 -y 0.517' ;;
+		end-color-list) ;;
 		*) COLOR='No Color Found' ;;
 	esac
 
+	
 	if [ "$SHOWXY" = "1" ]; then
 		echo "$COLOR"
 	elif [ "$SHOWXY" = "2" ]; then
@@ -980,7 +983,9 @@ if [ ${#} -le 3 ]; then
 			exit 0
 		;;
 		colors)
-			grep "COLOR=" /jffs/scripts/mhue | awk 'BEGIN { FS = ")" } ; { print $1 }' | sed 's/\t\t//' | more 
+			printf "Availble colors for hue:\\n\\n"
+			sed -n '/start-color-list/,/end-color-list/p;/end-color-list/q' /jffs/scripts/mhue | awk 'BEGIN { FS = ")" } ; { print $1 }' | sed 's/\t\t//' | column
+			exit 0
 		;;
 		convert)
 			hue_color $2
