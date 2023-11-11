@@ -75,8 +75,9 @@
 # global variables 
 
 SCRIPTNAME="mhue"
+SCRIPTLOC="/jffs/scripts/$SCRIPTNAME"
 SCRIPTDIR="/jffs/addons/$SCRIPTNAME"
-SCRIPTVER="0.1.4"
+SCRIPTVER="0.1.5"
 SCRIPTCONF="$SCRIPTDIR/mhue.conf"
 HUERESPONSE="/tmp/hueresponse"
 HUEHASH="/tmp/mhue.hash"
@@ -91,7 +92,7 @@ function usage() {
 	echo "mhue Version $SCRIPTVER"
 	echo ""
 	echo "Usage:            mhue <command> | <light|group|scene> <number|name> <action> <value> [<value>]"
-	echo "=========================================================================="
+	echo "==============================================================================================="
 	echo "power usage                   :  mhue light|group n state <on|off> {color}"
 	echo "saturation                    :  mhue light|group n sat <0-255>"
 	echo "brightness                    :  mhue light|group n bri <0-255>"
@@ -107,10 +108,11 @@ function usage() {
 	echo
 	echo "help (this screen)            :  mhue help"
 	echo "install                       :  mhue install"
+	echo "update                        :  mhue update"
 	echo "uninstall                     :  mhue uninstall"
 	echo "get hub username              :  mhue gethueun"
 	echo "Show hub config               :  mhue hubconfig"
-	echo "=========================================================================="
+	echo "==============================================================================================="
 	exit 1
 }
 
@@ -959,6 +961,30 @@ remove_hue() {
 }
 
 
+updatemhue() {
+
+
+	if [ -x "$SCRIPTLOC" ] && [ -f "$SCRIPTCONF" ]; then
+		printf "\\nDownload and install the latest version of mhue (Y/N)? "
+		read a
+		if [ "$a" = "n" ] || [ "$a" = "N" ]; then
+			exit
+		else
+			oldwas=$(grep "SCRIPTVER=" /jffs/scripts/mhue)
+			printf "\\nOk, downloading mhue again\\n"
+			/usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/JGrana01/mhue/master/mhue.sh" -o "/jffs/scripts/mhue" && chmod 0755 /jffs/scripts/mhue
+			printf "\\n\\nDone.\\n"
+			newis=$(grep "SCRIPTVER=" /jffs/scripts/mhue)
+			printf "Old version was %s, new version us %s\\n" $oldwas $newis
+			
+		fi
+	else
+		printf "\\nNo $SCRIPTLOC or $SCRIPTCONF found"
+		printf "\\nDownload and install manually"
+	fi
+}
+
+
 
 # main script
 
@@ -1010,6 +1036,10 @@ if [ ${#} -le 3 ]; then
 		hubconfig)
 			checkapi
 			gethueconfig
+			exit 0
+		;;
+		update)
+			updatemhue
 			exit 0
 		;;
 		help)
